@@ -55,7 +55,23 @@ def get_qubo(G):
     Q = defaultdict(int)
 
     # Add QUBO construction here
+    # print(G.edges)
+    for edge in G.edges:
+        # print(edge)
+        seq = [0, 1]
+        rd = random.choice(seq)
+        # print(rd)
+        G.edges[edge[0], edge[1]]['weight'] = rd
 
+        if rd == 0: # friendly relationship
+            Q[(edge[0], edge[0])] += 1
+            Q[(edge[1], edge[1])] += 1
+            Q[(edge[0], edge[1])] -= 2
+        else: # hostile relationship
+            Q[(edge[0], edge[0])] -= 1
+            Q[(edge[1], edge[1])] -= 1
+            Q[(edge[0], edge[1])] += 2
+    # print(Q)
     return Q
 
 
@@ -72,8 +88,9 @@ def run_on_qpu(Q):
     """
 
     # Define the sampler and submit the QUBO
-
-    return
+    sampler = EmbeddingComposite(DWaveSampler())
+    response = sampler.sample_qubo(Q, num_reads = 1000)
+    return response
 
 def visualize(G, Q, sampleset, problem_filename, solution_filename):
     """ Creates and saves plots that show the problem and solution returned in the lowest
